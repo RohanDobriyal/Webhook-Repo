@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>GitHub Events Viewer</title>
+  <style>
+    /* Basic page setup */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+    }
+
+    /* Event cards */
+    .card {
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      border-left: 4px solid transparent;
+      transition: box-shadow .2s;
+    }
+    .card:hover {
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .card .icon {
+      font-size: 1.5rem;
+      margin-right: 0.75rem;
+    }
+    .card.push   { border-left-color: #1890ff; }
+    .card.pr     { border-left-color: #faad14; }
+    .card.merge  { border-left-color: #52c41a; }
+
+    /* Text inside */
+    .card .message {
+      flex: 1;
+      font-size: 1rem;
+    }
+    .card .timestamp {
+      font-size: 0.85rem;
+      color: #888;
+      margin-left: 1rem;
+      white-space: nowrap;
+    }
+
+    /* Loading / empty state */
+    #events {
+      text-align: center;
+      color: #666;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Latest GitHub Events</h1>
+    <div id="events">Loading…</div>
+  </div>
+
+  <script>
+    // Map action → icon + CSS class
+    const actionMeta = {
+      "PUSH":         { icon: "📥", cls: "push"  },
+      "PULL_REQUEST": { icon: "🔀", cls: "pr"    },
+      "MERGE":        { icon: "✔️", cls: "merge" }
+    };
+
+    // Format timestamp into IST: "4 July 2025, 4:04 AM IST"
+    function formatTimestamp(ts) {
+      const d = new Date(ts);
+      return d.toLocaleString("en-IN", {
+        day:     "numeric",
+        month:   "long",
+        year:    "numeric",
+        hour:    "numeric",
+        minute:  "2-digit",
+        hour12:  true,
+        timeZone: "Asia/Kolkata"
+      }) + " IST";
+    }
+
+    function formatEvent(e) {
+      const { icon, cls } = actionMeta[e.action] || { icon: "❓", cls: "" };
+      let text;
+
+      if (e.action === "PUSH") {
+        text = `${e.author} pushed to ${e.to_branch}`;
+      } else if (e.action === "PULL_REQUEST") {
+        text = `${e.author} opened a PR from ${e.from_branch} to ${e.to_branch}`;
+      } else if (e.action === "MERGE") {
+        text = `${e.author} merged ${e.from_branch} into ${e.to_branch}`;
+      } else {
+        text = `${e.author} did ${e.action}`;
+      }
+
+      const card = document.createElement("div");
+      card.className = `card ${cls}`;
+      card.innerHTML = `
+        <div class="icon">${icon}</div>
+        <div class="message">${text}</div>
+        <div class="timestamp">${formatTimestamp(e.timestamp)}</div>
+      `;
+      return card;
+    }
+
+    async function fetchAndRender() {
+      const container = document.getElementById("events");
+      try {
+        const res  = await fetch("/events");
+        const data = await res.json();
+
+        if (!data.length) {
+          container.textContent = "No events yet.";
+          return;
+        }
+
+        container.innerHTML = "";
+        data.forEach(evt => container.appendChild(formatEvent(evt)));
+      } catch (err) {
+        container.textContent = "Error loading events.";
+        console.error(err);
+      }
+    }
+
+    // Initial load + poll every 15s
+    fetchAndRender();
+    setInterval(fetchAndRender, 15000);
+  </script>
+</body>
+</html>
