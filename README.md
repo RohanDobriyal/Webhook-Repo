@@ -2,14 +2,14 @@
 
 A simple Flask-based GitHub webhook receiver and real-time event viewer.
 
----
+
 
 ## GitHub Repositories
 
 * **Action Repo** (dummy code): [RohanDobriyal/dummy-repo](https://github.com/RohanDobriyal/dummy-repo)
 * **Webhook Repo** (this project): [RohanDobriyal/Webhook-Repo](https://github.com/RohanDobriyal/Webhook-Repo)
 
----
+
 
 ## Overview
 
@@ -17,7 +17,7 @@ A simple Flask-based GitHub webhook receiver and real-time event viewer.
 2. **Normalization → MongoDB**: Stores minimal fields (`request_id`, `author`, `action`, `from_branch`, `to_branch`, `timestamp`).
 3. **Polling UI**: Static HTML page that fetches `/events` every 15 seconds and displays colored cards.
 
----
+
 
 ## Quick Start
 
@@ -68,7 +68,7 @@ PORT=5000
 
   Copy the HTTPS URL for webhook setup.
 
----
+
 
 ## Configure GitHub Webhook
 
@@ -78,7 +78,7 @@ In your **Action Repo** (`dummy-repo`) → **Settings** → **Webhooks**:
 * **Content type**: `application/json`
 * **Events**: Select **Push** and **Pull requests**
 
----
+
 
 ## Usage
 
@@ -88,7 +88,7 @@ In your **Action Repo** (`dummy-repo`) → **Settings** → **Webhooks**:
   * `GET /events` — returns JSON array of latest 50 events.
   * `POST /webhook` — GitHub’s webhook target.
 
----
+
 
 ## Folder Structure
 
@@ -99,10 +99,4 @@ Webhook-Repo/
 ├── .env.example       # Environment variable template
 └── static/            # Static UI files
     └── index.html
-```
-
----
-
-## License
-
-This project is licensed under MIT. Feel free to clone and adapt.
+`
